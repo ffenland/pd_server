@@ -32,8 +32,8 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "localhost",
     "127.0.0.1",
+    "localhost",
 ]
 
 
@@ -127,7 +127,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Auth
 AUTH_USER_MODEL = "users.User"
 
-
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://192.168.0.36:5173",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://192.168.0.36:5173",
+]
+CORS_ALLOW_ALL_ORIGINS = True
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
