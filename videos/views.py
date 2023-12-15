@@ -1,4 +1,5 @@
 import os
+import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -23,6 +24,17 @@ def writeFirebaseDB(key_code, file_name, file_path):
 
 class VideoView(APIView):
     def get(self, request):
+        key_code = "31433516"
+        # Show user's all videos.
+        # firebase
+        ref = db.reference(f"files/{key_code}")
+        snapshot = ref.order_by_key().get()
+        for key, val in snapshot.items():
+            if isinstance(val.get("path"), str):  # 'path' 키의 값이 문자열인 경우에만 처리
+                val["path"] = val["path"].replace("\\", "/")  # 문자열에서 역슬래시를 슬래시로 변경
+
+            print(f"{key} is {val}")
+
         return Response({"ok": True})
 
 
@@ -62,7 +74,7 @@ class VideoUploadView(APIView):
                 writeFirebaseDB(
                     key_code=user.key_code,
                     file_name=file_name,
-                    file_path=upload_path,
+                    file_path=f"static/videos/{user.key_code}",
                 )
 
                 return Response({"ok": True})
@@ -71,3 +83,6 @@ class VideoUploadView(APIView):
 
         else:
             return Response({"ok": False})
+
+    def delete(self, request):
+        pass
