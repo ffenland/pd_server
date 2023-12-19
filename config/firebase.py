@@ -26,12 +26,16 @@ if not firebase_admin._apps:
     )
 
 
-def generate_unique_key():
-    length = 8
-    while True:
-        key_code = "".join(random.choices(string.digits, k=length))
-        if not User.objects.filter(key_code=key_code).exists():
-            return key_code
+# def generate_unique_key():
+#     length = 8
+#     while True:
+#         key_code = "".join(random.choices(string.digits, k=length))
+#         if not User.objects.filter(key_code=key_code).exists():
+#             return key_code
+
+
+def get_key_code(user_uid):
+    pass
 
 
 class FirebaseAuthentication(authentication.BaseAuthentication):
@@ -52,11 +56,14 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
             uid = decoded_token.get("uid")
         except Exception:
             raise firebase_auth.UserNotFoundError
-        new_key_code = generate_unique_key()
+
         user, created = User.objects.get_or_create(
             username=uid,
         )
+
         if created:
+            ref = firebase_db.reference(f"keyCode/{uid}")
+            new_key_code = ref.get()
             user.key_code = new_key_code
             user.save()
         return (user, None)
