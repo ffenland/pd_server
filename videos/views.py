@@ -9,7 +9,7 @@ from django.conf import settings
 from firebase_admin import auth, db
 from .models import Video
 
-base_url = "http://127.0.0.1:8000/"
+base_url = "http://boripharma.ipdisk.co.kr:9875/"
 static_path = "static/videos/"
 
 
@@ -28,6 +28,25 @@ def writeFirebaseDB(key_code, file_name):
 def deleteFirebaseDB(key_code, file_name):
     ref = db.reference(f"files/{key_code}/{file_name.split('.')[0]}")
     ref.delete()
+
+
+def delete_file(key_code, file_name):
+    file_path = os.path.join("static", "videos", key_code, file_name)
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+
+def delete_monitor_file(key_code, file_path):
+    ref = db.reference(f"monitors/{key_code}")
+    monitors = ref.get()
+    if monitors:
+        for monitor_key, monitor_value in monitors.items():
+            if ("files") in monitor_value:
+                files = monitor_value["files"]
+                if file_path in files:
+                    print(files)
+                    files.remove(file_path)
+                    ref.child(f"{monitor_key}/files").set(files)
 
 
 class VideoView(APIView):
@@ -87,24 +106,17 @@ class VideoView(APIView):
         else:
             return Response({"ok": False})
 
-    def delete(self, request):
-        file_name = request.data.get("fileName")
-        key_code = request.data.get("key_code")
+    def put(self, request):
+        file_path = request.data.get("filePath")
+        key_code = request.user.key_code
+        file_name = file_path.split("/")[-1]
 
-        if file_name and key_code:
-            try:
-                user = request.user
-                file_path = os.path.join(
-                    "static", "videos", f"{user.key_code}", file_name
-                )
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-                    deleteFirebaseDB(user.key_code, file_name)
+        try:
+            delete_file(key_code, file_name)
+            deleteFirebaseDB(key_code, file_name)
+            delete_monitor_file(key_code, file_path)
 
-                    return Response({"ok": True})
-                else:
-                    return Response({"ok": False, "error": "File not found"})
-            except Exception as e:
-                return Response({"ok": False, "error": str(e)})
-        else:
-            return Response({"ok": False, "error": "Invalid request data"})
+            return Response({"ok": True})
+
+        except Exception as e:
+            return Response({"ok": False, "error": str(e)})

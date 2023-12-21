@@ -31,6 +31,8 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    "boripharma.ipdisk.co.kr",
+    "192.168.0.9",
     "127.0.0.1",
     "localhost",
 ]
@@ -127,10 +129,12 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = "users.User"
 
 CORS_ALLOWED_ORIGINS = [
+    "http://boripharma.ipdisk.co.kr:9876",
     "http://127.0.0.1:5173",
     "http://192.168.0.36:5173",
 ]
 CSRF_TRUSTED_ORIGINS = [
+    "http://boripharma.ipdisk.co.kr:9876",
     "http://127.0.0.1:5173",
     "http://192.168.0.36:5173",
 ]
